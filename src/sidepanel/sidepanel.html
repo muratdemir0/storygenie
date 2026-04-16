@@ -12,29 +12,29 @@
     <header class="header">
       <div class="header-brand">
         <svg class="logo" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="24" height="24" rx="6" fill="url(#grad)"/>
           <defs>
             <linearGradient id="grad" x1="0" y1="0" x2="24" y2="24">
-              <stop stop-color="#6C63FF"/>
-              <stop offset="1" stop-color="#3B82F6"/>
+              <stop stop-color="#7c6cf5"/>
+              <stop offset="1" stop-color="#6454e0"/>
             </linearGradient>
           </defs>
-          <text x="12" y="17" fill="#fff" font-family="system-ui, sans-serif" font-weight="bold" font-size="15" text-anchor="middle">S</text>
+          <rect width="24" height="24" rx="7" fill="url(#grad)"/>
+          <text x="12" y="17" fill="#fff" font-family="Inter, system-ui, sans-serif" font-weight="700" font-size="14" text-anchor="middle">S</text>
         </svg>
         <h1 class="header-title">StoryGenie</h1>
       </div>
       <button id="btn-settings-toggle" class="btn-icon" title="Settings" aria-label="Open settings">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
           <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
         </svg>
       </button>
     </header>
 
-    <!-- Main Content -->
+    <!-- Scroll Area -->
     <main class="main">
       <!-- Empty State -->
-      <section id="section-empty" class="section card">
+      <section id="section-empty" class="section">
         <div class="empty-state">
           <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="6" y="8" width="36" height="32" rx="4" stroke="currentColor" stroke-width="2" opacity="0.3"/>
@@ -45,8 +45,9 @@
         </div>
       </section>
 
-      <!-- Issue Data (Hidden by default) -->
-      <section id="section-issue" class="section card" style="display: none;">
+      <!-- Issue Data (Input Section) -->
+      <section id="section-issue" class="section" style="display: none;">
+        <div class="section-label">Source</div>
         <div class="issue-header">
           <span id="issue-type-badge" class="badge badge-type">Task</span>
           <span id="issue-key" class="issue-key">PROJ-123</span>
@@ -82,7 +83,7 @@
       </section>
 
       <!-- Loading State -->
-      <section id="section-loading" class="section card" style="display: none;">
+      <section id="section-loading" class="section" style="display: none;">
         <div class="loading-state">
           <div class="spinner"></div>
           <p class="loading-text">Generating your User Story…</p>
@@ -91,7 +92,7 @@
       </section>
 
       <!-- Error State -->
-      <section id="section-error" class="section card card-error" style="display: none;">
+      <section id="section-error" class="section" style="display: none;">
         <div class="error-state">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"/>
@@ -103,34 +104,36 @@
         </div>
       </section>
 
-      <!-- Generated Story -->
-      <section id="section-story" class="section card" style="display: none;">
+      <!-- Generated Story (Output Section — no nested card) -->
+      <section id="section-story" class="section" style="display: none;">
         <div class="story-header">
-          <h3 class="story-title">Generated User Story</h3>
+          <h3 class="story-title">Generated Output</h3>
           <div class="story-meta">
             <span id="story-provider" class="meta-tag"></span>
             <span id="story-model" class="meta-tag"></span>
           </div>
         </div>
         <div id="story-content" class="story-content"></div>
-        <div class="story-actions">
-          <button id="btn-copy" class="btn btn-secondary">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-            </svg>
-            <span id="btn-copy-text">Copy to Clipboard</span>
-          </button>
-          <button id="btn-regenerate" class="btn btn-primary btn-sm">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="23 4 23 10 17 10"/>
-              <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
-            </svg>
-            Regenerate
-          </button>
-        </div>
       </section>
     </main>
+
+    <!-- Footer (appears when story is generated) -->
+    <div id="story-footer" class="story-actions" style="display: none;">
+      <button id="btn-copy" class="btn btn-secondary btn-sm">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+        </svg>
+        <span id="btn-copy-text">Copy</span>
+      </button>
+      <button id="btn-regenerate" class="btn btn-primary btn-sm">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+        </svg>
+        Regenerate
+      </button>
+    </div>
 
     <!-- Settings Panel (Hidden by default) -->
     <div id="settings-overlay" class="settings-overlay" style="display: none;">
@@ -138,7 +141,7 @@
         <div class="settings-header">
           <h2 class="settings-title">Settings</h2>
           <button id="btn-settings-close" class="btn-icon" aria-label="Close settings">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"/>
               <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>

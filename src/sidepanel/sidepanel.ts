@@ -41,6 +41,7 @@ const elements = {
   storyContent: document.getElementById('story-content')!,
   storyProvider: document.getElementById('story-provider')!,
   storyModel: document.getElementById('story-model')!,
+  storyFooter: document.getElementById('story-footer')!,
 
   // Error
   errorMessage: document.getElementById('error-message')!,
@@ -77,6 +78,8 @@ function showSection(name: SectionName, keepIssue = false): void {
   elements.sectionLoading.style.display = name === 'loading' ? '' : 'none';
   elements.sectionError.style.display = name === 'error' ? '' : 'none';
   elements.sectionStory.style.display = name === 'story' ? '' : 'none';
+  // Show/hide the footer
+  elements.storyFooter.style.display = name === 'story' ? '' : 'none';
 }
 
 // --- Render Issue Data ---
@@ -123,7 +126,6 @@ function renderIssueData(issue: NormalizedIssueInput): void {
 function renderStory(story: UserStoryResult): void {
   currentStory = story;
 
-  // Simple markdown-to-html rendering
   elements.storyContent.innerHTML = renderMarkdown(story.raw);
   elements.storyProvider.textContent = story.provider;
   elements.storyModel.textContent = story.model;
@@ -131,34 +133,37 @@ function renderStory(story: UserStoryResult): void {
   showSection('story', true);
 }
 
-/**
- * Basic markdown rendering — handles headers, bold, lists, line breaks.
- * No external dependencies needed for this scope.
- */
+// ============================================================
+// Markdown → HTML renderer
+// Produces Gherkin code blocks, Scenario blocks, and AC blocks
+// ============================================================
+
 function renderMarkdown(text: string): string {
   const lines = text.split('\n');
   let html = '';
   let inList = false;
   let inTable = false;
+  let inGherkin = false;
+  let inAc = false;
+  let inScenario = false;
   let tableRows: string[] = [];
 
   const flushList = () => {
-    if (inList) {
-      html += '</ul>';
-      inList = false;
-    }
+    if (inList) { html += '</ul>'; inList = false; }
   };
-
+  const flushGherkin = () => {
+    if (inGherkin) { html += '</div>'; inGherkin = false; }
+  };
   const flushTable = () => {
     if (inTable) {
       if (tableRows.length > 0) {
         html += '<div class="table-container"><table>';
         tableRows.forEach((row, idx) => {
-          const cells = row.split('|').filter(c => c.trim() !== '' || row.includes('||')).map(c => c.trim());
+          const cells = row.split('|').filter(c => c.trim() !== '').map(c => c.trim());
           if (idx === 0) {
             html += `<thead><tr>${cells.map(c => `<th>${renderInlineMarkdown(escapeHtml(c))}</th>`).join('')}</tr></thead><tbody>`;
           } else if (idx === 1 && row.includes('---')) {
-            // Skip separator row
+            // skip separator
           } else {
             html += `<tr>${cells.map(c => `<td>${renderInlineMarkdown(escapeHtml(c))}</td>`).join('')}</tr>`;
           }
@@ -169,13 +174,26 @@ function renderMarkdown(text: string): string {
       tableRows = [];
     }
   };
+  const flushAc = () => {
+    flushGherkin();
+    if (inAc) { html += '</div>'; inAc = false; }
+  };
+  const flushScenario = () => {
+    flushAc();
+    if (inScenario) { html += '</div>'; inScenario = false; }
+  };
+  const flushAll = () => {
+    flushList();
+    flushTable();
+    flushScenario();
+  };
 
   lines.forEach((line) => {
     const trimmed = line.trim();
 
-    // Tables
+    // --- Tables ---
     if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
-      flushList();
+      flushList(); flushGherkin();
       inTable = true;
       tableRows.push(trimmed);
       return;
@@ -183,45 +201,86 @@ function renderMarkdown(text: string): string {
       flushTable();
     }
 
-    // List items
-    if (trimmed.startsWith('- ')) {
-      if (!inList) {
-        html += '<ul>';
-        inList = true;
+    // --- Gherkin keywords: Given / When / Then ---
+    const gherkinMatch = trimmed.match(/^(Given|When|Then)\b\s*(.*)/);
+    if (gherkinMatch) {
+      flushList(); flushTable();
+      const keyword = gherkinMatch[1];
+      const rest = gherkinMatch[2];
+      const kwClass = `kw-${keyword.toLowerCase()}`;
+      if (!inGherkin) {
+        html += '<div class="gherkin">';
+        inGherkin = true;
       }
+      html += `<div class="gherkin-line"><span class="kw ${kwClass}">${keyword.toUpperCase()}</span><span>${renderInlineMarkdown(escapeHtml(rest))}</span></div>`;
+      return;
+    }
+
+    // Close gherkin if we hit a non-gherkin line
+    if (inGherkin) { flushGherkin(); }
+
+    // --- SCENARIO header ---
+    const scenarioMatch = trimmed.match(/^SCENARIO\s+(\d+)\s*[-–—·]\s*(.*)/i);
+    if (scenarioMatch) {
+      flushList(); flushTable(); flushScenario();
+      const num = scenarioMatch[1].padStart(2, '0');
+      const title = scenarioMatch[2];
+      html += `<div class="scenario-block"><div class="scenario-header"><div class="scenario-label">SCENARIO ${num}</div><div class="scenario-title">${renderInlineMarkdown(escapeHtml(title))}</div></div>`;
+      inScenario = true;
+      return;
+    }
+
+    // --- AC header ---
+    const acMatch = trimmed.match(/^AC\s+(\d+)\s*[:·–—]\s*(.*)/i);
+    if (acMatch) {
+      flushList(); flushTable(); flushAc();
+      const num = acMatch[1];
+      const title = acMatch[2];
+      html += `<div class="ac"><div class="ac-header"><span class="ac-tag">AC ${num}</span><span class="ac-title">${renderInlineMarkdown(escapeHtml(title))}</span></div>`;
+      inAc = true;
+      return;
+    }
+
+    // --- List items ---
+    if (trimmed.startsWith('- ')) {
+      flushGherkin(); flushTable();
+      if (!inList) { html += '<ul>'; inList = true; }
       html += `<li>${renderInlineMarkdown(escapeHtml(trimmed.slice(2)))}</li>`;
       return;
     } else {
       flushList();
     }
 
-    // Headers
+    // --- Headers ---
     if (trimmed.startsWith('## ')) {
+      flushAll();
       html += `<h2>${renderInlineMarkdown(escapeHtml(trimmed.slice(3)))}</h2>`;
     } else if (trimmed.startsWith('### ')) {
+      flushAll();
       html += `<h3>${renderInlineMarkdown(escapeHtml(trimmed.slice(4)))}</h3>`;
-    } else if (trimmed.startsWith('SCENARIO') || trimmed.startsWith('AC ')) {
-      html += `<h3 class="gherkin-header">${renderInlineMarkdown(escapeHtml(trimmed))}</h3>`;
-    } 
-    // Keywords highlighting
-    else if (/^(As|I want|So that|Given|When|Then)/.test(trimmed)) {
-      const parts = trimmed.split(' ');
-      const keyword = parts[0];
-      const rest = parts.slice(1).join(' ');
-      html += `<p><span class="keyword">${keyword}</span> ${renderInlineMarkdown(escapeHtml(rest))}</p>`;
     }
-    // Empty line
+    // --- As / I want / So that ---
+    else if (/^(As|I want|So that)\b/.test(trimmed)) {
+      const match = trimmed.match(/^(As|I want|So that)\b\s*(.*)/);
+      if (match) {
+        html += `<p><strong>${escapeHtml(match[1])}</strong> ${renderInlineMarkdown(escapeHtml(match[2]))}</p>`;
+      }
+    }
+    // --- Section labels ---
+    else if (/^(Assumptions|Contains|Background)\b/.test(trimmed)) {
+      html += `<h3>${renderInlineMarkdown(escapeHtml(trimmed))}</h3>`;
+    }
+    // --- Empty line ---
     else if (trimmed === '') {
-      html += '<br/>';
-    } 
-    // Regular paragraph
+      // natural spacing
+    }
+    // --- Regular paragraph ---
     else {
-      html += `<p>${renderInlineMarkdown(escapeHtml(line))}</p>`;
+      html += `<p>${renderInlineMarkdown(escapeHtml(trimmed))}</p>`;
     }
   });
 
-  flushList();
-  flushTable();
+  flushAll();
   return html;
 }
 
@@ -303,13 +362,13 @@ async function copyStoryToClipboard(): Promise<void> {
     elements.btnCopyText.textContent = 'Copied!';
     elements.btnCopy.classList.add('btn-copy-success');
     setTimeout(() => {
-      elements.btnCopyText.textContent = 'Copy to Clipboard';
+      elements.btnCopyText.textContent = 'Copy';
       elements.btnCopy.classList.remove('btn-copy-success');
     }, 2000);
   } catch {
-    elements.btnCopyText.textContent = 'Failed to copy';
+    elements.btnCopyText.textContent = 'Failed';
     setTimeout(() => {
-      elements.btnCopyText.textContent = 'Copy to Clipboard';
+      elements.btnCopyText.textContent = 'Copy';
     }, 2000);
   }
 }
