@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StoryGenie</title>
+  <link rel="stylesheet" href="./sidepanel.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-brand">
+        <svg class="logo" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="24" height="24" rx="6" fill="url(#grad)"/>
+          <defs>
+            <linearGradient id="grad" x1="0" y1="0" x2="24" y2="24">
+              <stop stop-color="#6C63FF"/>
+              <stop offset="1" stop-color="#3B82F6"/>
+            </linearGradient>
+          </defs>
+          <text x="12" y="17" fill="#fff" font-family="system-ui, sans-serif" font-weight="bold" font-size="15" text-anchor="middle">S</text>
+        </svg>
+        <h1 class="header-title">StoryGenie</h1>
+      </div>
+      <button id="btn-settings-toggle" class="btn-icon" title="Settings" aria-label="Open settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Empty State -->
+      <section id="section-empty" class="section card">
+        <div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="8" width="36" height="32" rx="4" stroke="currentColor" stroke-width="2" opacity="0.3"/>
+            <path d="M14 18h20M14 24h16M14 30h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
+          </svg>
+          <p class="empty-text">Navigate to a Jira issue page to get started</p>
+          <p class="empty-hint">The extension will automatically detect and extract issue data</p>
+        </div>
+      </section>
+
+      <!-- Issue Data (Hidden by default) -->
+      <section id="section-issue" class="section card" style="display: none;">
+        <div class="issue-header">
+          <span id="issue-type-badge" class="badge badge-type">Task</span>
+          <span id="issue-key" class="issue-key">PROJ-123</span>
+          <span id="issue-priority-badge" class="badge badge-priority">Medium</span>
+        </div>
+        <h2 id="issue-summary" class="issue-summary">Issue summary goes here</h2>
+
+        <div id="issue-description-block" class="issue-field">
+          <h3 class="field-label">Description</h3>
+          <p id="issue-description" class="field-value">—</p>
+        </div>
+
+        <div id="issue-labels-block" class="issue-field" style="display: none;">
+          <h3 class="field-label">Labels</h3>
+          <div id="issue-labels" class="labels-container"></div>
+        </div>
+
+        <div id="issue-ac-block" class="issue-field" style="display: none;">
+          <h3 class="field-label">Acceptance Criteria</h3>
+          <p id="issue-ac" class="field-value">—</p>
+        </div>
+
+        <button id="btn-generate" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+            <path d="M5 3v4"/>
+            <path d="M19 17v4"/>
+            <path d="M3 5h4"/>
+            <path d="M17 19h4"/>
+          </svg>
+          Generate User Story
+        </button>
+      </section>
+
+      <!-- Loading State -->
+      <section id="section-loading" class="section card" style="display: none;">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p class="loading-text">Generating your User Story…</p>
+          <p class="loading-hint">This may take a few seconds depending on your LLM provider</p>
+        </div>
+      </section>
+
+      <!-- Error State -->
+      <section id="section-error" class="section card card-error" style="display: none;">
+        <div class="error-state">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <p id="error-message" class="error-text">Something went wrong</p>
+          <button id="btn-retry" class="btn btn-secondary">Try Again</button>
+        </div>
+      </section>
+
+      <!-- Generated Story -->
+      <section id="section-story" class="section card" style="display: none;">
+        <div class="story-header">
+          <h3 class="story-title">Generated User Story</h3>
+          <div class="story-meta">
+            <span id="story-provider" class="meta-tag"></span>
+            <span id="story-model" class="meta-tag"></span>
+          </div>
+        </div>
+        <div id="story-content" class="story-content"></div>
+        <div class="story-actions">
+          <button id="btn-copy" class="btn btn-secondary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+            </svg>
+            <span id="btn-copy-text">Copy to Clipboard</span>
+          </button>
+          <button id="btn-regenerate" class="btn btn-primary btn-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+            </svg>
+            Regenerate
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Settings Panel (Hidden by default) -->
+    <div id="settings-overlay" class="settings-overlay" style="display: none;">
+      <div class="settings-panel">
+        <div class="settings-header">
+          <h2 class="settings-title">Settings</h2>
+          <button id="btn-settings-close" class="btn-icon" aria-label="Close settings">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <form id="settings-form" class="settings-form">
+          <div class="form-group">
+            <label for="setting-provider">Provider</label>
+            <div class="select-custom-wrapper">
+              <select id="setting-provider" class="form-control">
+                <option value="openai-compatible">OpenAI Compatible</option>
+              </select>
+              <div class="select-arrow">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+            </div>
+            <span class="form-hint">Works with OpenAI, LM Studio, Groq, Together AI, etc.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="setting-base-url">Base URL</label>
+            <input
+              id="setting-base-url"
+              type="url"
+              class="form-control"
+              placeholder="https://api.openai.com/v1"
+              required
+            />
+            <span class="form-hint">
+              OpenAI: https://api.openai.com/v1<br/>
+              LM Studio: http://127.0.0.1:1234/v1
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="setting-model">Model</label>
+            <div class="model-input-combined">
+              <div class="select-custom-wrapper">
+                <input
+                  id="setting-model"
+                  list="model-list"
+                  type="text"
+                  class="form-control"
+                  placeholder="gpt-4o-mini"
+                  required
+                />
+                <datalist id="model-list"></datalist>
+                <div class="select-arrow">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+              </div>
+              <button type="button" id="btn-fetch-models" class="btn-fetch" title="Fetch models from Base URL">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/>
+                </svg>
+              </button>
+            </div>
+            <span class="form-hint">Manual entry or click sync to fetch from URL.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="setting-api-key">API Key</label>
+            <input
+              id="setting-api-key"
+              type="password"
+              class="form-control"
+              placeholder="sk-... (optional for local models)"
+            />
+            <span class="form-hint">Not required for LM Studio. For OpenAI, paste your API key.</span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="setting-temperature">Temperature</label>
+              <input
+                id="setting-temperature"
+                type="number"
+                class="form-control"
+                min="0"
+                max="2"
+                step="0.1"
+                value="0.7"
+              />
+            </div>
+            <div class="form-group">
+              <label for="setting-max-tokens">Max Tokens</label>
+              <input
+                id="setting-max-tokens"
+                type="number"
+                class="form-control"
+                min="256"
+                max="16384"
+                step="256"
+                value="2048"
+              />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Settings</button>
+            <button type="button" id="btn-settings-cancel" class="btn btn-secondary">Cancel</button>
+          </div>
+          <p id="settings-status" class="settings-status" style="display: none;"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./sidepanel.ts"></script>
+</body>
+</html>

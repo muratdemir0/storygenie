@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>[PROJ-123] Create magical user stories - Jira</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; color: #172B4D; }
+        .issue-container { max-width: 800px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+        h1 { font-size: 24px; }
+        .badge { background: #deebff; color: #0747a6; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; }
+        .description-box { background: #f4f5f7; padding: 15px; border-radius: 5px; margin-top: 20px; }
+        .label { background: #ebecf0; padding: 2px 6px; border-radius: 3px; margin-right: 5px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="issue-container">
+        <!-- Jira Summary Heading -->
+        <h1 data-testid="issue.views.issue-base.foundation.summary.heading">Create magical user stories for every developer</h1>
+        
+        <!-- Issue Details -->
+        <div>
+            <span data-testid="issue.views.issue-base.foundation.issue-type.button">Task</span>
+            <span data-testid="issue.views.issue-base.foundation.priority.button">Medium</span>
+        </div>
+
+        <!-- Description -->
+        <div class="description-box" data-testid="issue.views.field.rich-text.description">
+            The current process of writing user stories is too slow and manual.
+            We need a tool that can automatically transform technical Jira tickets
+            into business-friendly User Stories using LLMs like GPT-4 or local Llama models.
+            The tool should support multiple providers.
+        </div>
+
+        <!-- Labels -->
+        <div style="margin-top: 15px;">
+            <strong>Labels:</strong>
+            <div data-testid="issue.views.field.multi-select.labels">
+                <span class="label">ai-tools</span>
+                <span class="label">productivity</span>
+            </div>
+        </div>
+
+        <!-- Custom Field: Acceptance Criteria -->
+        <div style="margin-top: 20px;">
+            <h3 role="heading">Acceptance Criteria</h3>
+            <div data-testid="custom-acceptance-criteria">
+                - Extension detects jira cloud pages
+                - Extension extracts summary and description
+                - Extension supports LM Studio
+                - User story is generated in markdown format
+            </div>
+        </div>
+    </div>
+</body>
+</html>
