@@ -18,6 +18,16 @@ StoryGenie is a Chrome Extension that reads data from Jira issue pages and gener
 
 ---
 
+## Screenshots
+
+<p align="center">
+  <img src="assets/1.jpg" width="280" alt="StoryGenie Sidebar" />
+  <img src="assets/2.jpg" width="280" alt="Settings Configuration" />
+  <img src="assets/3.jpg" width="280" alt="User Story Generation" />
+</p>
+
+---
+
 ## Quick Start
 
 ### Prerequisites
