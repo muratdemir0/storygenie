@@ -1,6 +1,6 @@
 {
   "name": "storygenie",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Transform Jira tickets into well-written User Stories using AI",
   "private": true,
   "type": "module",
